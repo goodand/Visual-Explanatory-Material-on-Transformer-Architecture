@@ -1,0 +1,168 @@
+/* ============================================
+   축(Chuk) Design System — Structural Mode Tokens
+
+   FIXED AXES: domain-agnostic structural dimensions
+   that govern how concepts are visually encoded.
+
+   ┌─────────────────────────────────────────────────────────┐
+   │ TOKEN OWNERSHIP TABLE                                     │
+   │ Each token belongs to exactly ONE mode. Color is owned    │
+   │ ONLY by Topic Mode / Domain Profile — never by a          │
+   │ structural mode.                                          │
+   ├───────────────────┬───────────────────────────────────────┤
+   │ Mode              │ Owns (visual channel → token prefix)  │
+   ├───────────────────┼───────────────────────────────────────┤
+   │ Relation          │ placement, distance, boundary,        │
+   │                   │ bracket, Venn, line style             │
+   │                   │ → --relation-*   (NO color meaning)   │
+   │ Process           │ position, arrow, flow line, order,    │
+   │                   │ timing, step number                   │
+   │                   │ → --process-*    (NO color meaning)   │
+   │ Abstraction       │ scale, zoom, block open/close,        │
+   │                   │ depth label                           │
+   │                   │ → --abstraction-* (NO opacity, NO color)│
+   │ Disclosure        │ open/collapsed/hidden/focus, center   │
+   │                   │ placement, brightness(opacity),       │
+   │                   │ border, state bar                     │
+   │                   │ → --disclosure-*  (opacity lives HERE)│
+   │ Representation    │ 5-slot layout, slot label, position,  │
+   │                   │ small neutral icon                    │
+   │                   │ → --repr-*  (NO shape/color encoding) │
+   │ Topic / Domain    │ COLOR (the only color-owning axis)    │
+   │                   │ → --topic-*  (+ domain-profiles/*.css)│
+   └───────────────────┴───────────────────────────────────────┘
+   ============================================ */
+
+:root {
+  /* ═══════════════════════════════════════════
+     RELATION MODE — 같음 / 비슷함 / 다름 / 포함 / 독립
+     Channel: placement, distance, boundary, bracket, Venn (주)
+              + line style (보조).  NO color meaning.
+     ═══════════════════════════════════════════ */
+  --relation-stroke-color: var(--color-slate-9);
+  --relation-same-stroke: 2px solid var(--relation-stroke-color); /* @kind other */
+  --relation-similar-stroke: 2px dashed var(--relation-stroke-color); /* @kind other */
+  --relation-different-stroke: 2px solid var(--relation-stroke-color); /* @kind other */
+  --relation-contains-stroke: 2px solid var(--relation-stroke-color); /* @kind other */
+  --relation-independent-stroke: 1px dotted var(--relation-stroke-color); /* @kind other */
+  --relation-bracket-color: var(--color-slate-7);
+  --relation-bracket-width: 2px; /* @kind spacing */
+  --relation-boundary-color: var(--color-slate-6);
+  --relation-boundary-style: dashed; /* @kind other */
+  --relation-boundary-radius: var(--radius-lg);
+  --relation-venn-fill: var(--color-slate-4);
+  --relation-venn-opacity: 0.35; /* @kind other */
+  --relation-venn-ring: 1.5px solid var(--color-slate-7); /* @kind other */
+  /* Venn intersection = TRUE lens (circle clipped by circle), never an
+     approximated shape. Hatch is the primary fill — achromatic, so Relation
+     stays color-free. Geometry spec: strategy/visual_formats/venn.md */
+  --relation-venn-hatch-angle: 45deg; /* @kind other */
+  --relation-venn-hatch-gap: 8px; /* @kind spacing */
+  --relation-venn-hatch-width: 1.5px; /* @kind spacing */
+  --relation-venn-hatch-stroke: var(--color-slate-7);
+
+  /* ═══════════════════════════════════════════
+     PROCESS MODE — 입력 / 절차 / 출력
+     Channel: position, arrow, order, timing (주)
+              + step number, flow line (보조).  NO color meaning.
+     ═══════════════════════════════════════════ */
+  --process-input-position: flex-start; /* @kind other */  /* 왼쪽/상단 시작 */
+  --process-procedure-position: center; /* @kind other */  /* 중앙 block */
+  --process-output-position: flex-end; /* @kind other */   /* 오른쪽/하단 결과 */
+  --process-block-bg: var(--color-slate-1);
+  --process-block-border: var(--color-slate-4);
+  --process-arrow-color: var(--color-slate-7);
+  --process-arrow-size: 8px; /* @kind spacing */
+  --process-flow-line: 2px solid var(--color-slate-5); /* @kind other */
+  --process-timing-input: 0ms; /* @kind other */
+  --process-timing-procedure: var(--anim-stagger-delay); /* @kind other */
+  --process-timing-output: calc(var(--anim-stagger-delay) * 2); /* @kind other */
+  --process-step-size: 20px; /* @kind spacing */
+  --process-step-bg: var(--color-slate-9);
+  --process-step-fg: var(--color-white);
+  --process-step-font: var(--font-mono); /* @kind font */
+
+  /* ═══════════════════════════════════════════
+     ABSTRACTION MODE — 거시(macro) / 중간(meso) / 미시(micro)
+     Channel: scale, zoom, block open/close, depth label.
+              NO opacity (opacity = Disclosure), NO color.
+     ═══════════════════════════════════════════ */
+  --abstraction-macro-scale: 0.6; /* @kind other */
+  --abstraction-meso-scale: 1.0; /* @kind other */
+  --abstraction-micro-scale: 1.5; /* @kind other */
+  --abstraction-zoom-duration: var(--duration-slower); /* @kind other */
+  --abstraction-zoom-ease: var(--ease-spring); /* @kind other */
+  --abstraction-block-open-scale: 1.0; /* @kind other */
+  --abstraction-block-closed-scale: 0.85; /* @kind other */
+  --abstraction-depth-label-color: var(--color-slate-6);
+  --abstraction-depth-label-size: var(--font-size-xs); /* @kind font */
+  --abstraction-depth-macro-label: "거시 · global"; /* @kind other */
+  --abstraction-depth-meso-label: "중간 · module"; /* @kind other */
+  --abstraction-depth-micro-label: "미시 · internal"; /* @kind other */
+
+  /* ═══════════════════════════════════════════
+     DISCLOSURE MODE — open / collapsed / hidden / focus
+     Channel: visible/collapsed/hidden state, center placement,
+              focus (주) + brightness(opacity), border, state bar (보조).
+              Opacity is owned HERE, and kept minimal — prefer
+              hidden/collapsed/open over faint dimming.
+     ═══════════════════════════════════════════ */
+  --disclosure-open-opacity: 1; /* @kind other */
+  --disclosure-hidden-opacity: 0; /* @kind other */
+  --disclosure-dim-opacity: 0.4; /* @kind other */  /* rare; secondary brightness only */
+  /* focus = center placement + thick NEUTRAL border (never a topic color) */
+  --disclosure-focus-scale: 1.05; /* @kind other */
+  --disclosure-focus-border: 2px solid var(--color-slate-12); /* @kind other */
+  --disclosure-focus-ring: 0 0 0 3px var(--color-slate-4); /* @kind other */
+  /* collapsed = role label + reduced height (not dimming) */
+  --disclosure-collapsed-height: 24px; /* @kind spacing */
+  --disclosure-collapsed-bg: var(--color-slate-2);
+  --disclosure-collapsed-label-color: var(--color-slate-7);
+  /* state bar */
+  --disclosure-statebar-bg: var(--color-slate-1);
+  --disclosure-statebar-height: 28px; /* @kind spacing */
+  --disclosure-statebar-fg: var(--color-slate-7);
+  --disclosure-statebar-active-fg: var(--color-slate-11);
+
+  /* ═══════════════════════════════════════════
+     REPRESENTATION MODE — 데이터 / 표현 / 계산 대상 / 개념 분류 / 중요성
+     Channel: 5-slot layout, fixed position, slot label (주)
+              + small neutral icon, text label (보조).
+              An explanation FRAME, not a shape/color symbol system.
+     ═══════════════════════════════════════════ */
+  --repr-slot-count: 5; /* @kind other */
+  --repr-slot-gap: var(--space-2); /* @kind spacing */
+  --repr-slot-bg: var(--color-slate-1);
+  --repr-slot-radius: var(--radius-sm);
+  --repr-slot-1-label: "데이터"; /* @kind other */
+  --repr-slot-2-label: "표현"; /* @kind other */
+  --repr-slot-3-label: "계산 대상"; /* @kind other */
+  --repr-slot-4-label: "개념 분류"; /* @kind other */
+  --repr-slot-5-label: "중요성"; /* @kind other */
+  --repr-label-color: var(--color-slate-9);
+  --repr-label-size: var(--font-size-xs); /* @kind font */
+  --repr-icon-color: var(--color-slate-7);   /* uniform neutral — no per-type color */
+  --repr-icon-bg: var(--color-slate-3);
+  --repr-icon-size: 18px; /* @kind spacing */
+
+  /* ═══════════════════════════════════════════
+     TOPIC MODE (CONFIGURABLE SLOT) — the ONLY color-owning axis
+     Domain profiles override these. See domain-profiles/.
+     ═══════════════════════════════════════════ */
+  --topic-slot-count: 5; /* @kind other */
+  --topic-1-color: var(--color-violet-9);
+  --topic-1-bg: var(--color-violet-2);
+  --topic-1-label: "Topic A"; /* @kind other */
+  --topic-2-color: var(--color-teal-9);
+  --topic-2-bg: var(--color-teal-2);
+  --topic-2-label: "Topic B"; /* @kind other */
+  --topic-3-color: var(--color-amber-9);
+  --topic-3-bg: var(--color-amber-2);
+  --topic-3-label: "Topic C"; /* @kind other */
+  --topic-4-color: var(--color-blue-9);
+  --topic-4-bg: var(--color-blue-2);
+  --topic-4-label: "Topic D"; /* @kind other */
+  --topic-5-color: var(--color-green-9);
+  --topic-5-bg: var(--color-green-2);
+  --topic-5-label: "Topic E"; /* @kind other */
+}

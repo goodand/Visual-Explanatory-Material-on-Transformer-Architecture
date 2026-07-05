@@ -1,0 +1,49 @@
+/* ============================================
+   ML Animations Design System — Typography Tokens
+   Based on DaleStudy/daleui typography system
+   Fonts: Pretendard Variable (sans), JetBrains Mono (mono)
+   ============================================ */
+
+:root {
+  /* ── Font Families ── */
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+  --font-math: "KaTeX_Main", "STIX Two Math", "Cambria Math", "Latin Modern Math", serif;
+
+  /* ── Font Sizes ── */
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-md: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem;  /* 36px */
+  --font-size-5xl: 2.75rem;  /* 44px */
+  --font-size-7xl: 3.75rem;  /* 60px */
+  --font-size-8xl: 4.5rem;   /* 72px */
+
+  /* ── Font Weights ── */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ── Line Heights ── */
+  --line-height-tight: 1.2;
+  --line-height-balanced: 1.5;
+  --line-height-relaxed: 1.625;
+
+  /* ── Letter Spacing ── */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-balanced: 0em;
+
+  /* ── Animation-specific Typography ── */
+  --anim-font-label: var(--font-sans);
+  --anim-font-code: var(--font-mono);
+  --anim-font-formula: var(--font-math);
+  --anim-font-size-label: var(--font-size-sm);
+  --anim-font-size-title: var(--font-size-2xl);
+  --anim-font-size-subtitle: var(--font-size-lg);
+  --anim-font-size-annotation: var(--font-size-xs);
+}

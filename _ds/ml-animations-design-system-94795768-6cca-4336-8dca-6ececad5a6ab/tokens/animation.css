@@ -1,0 +1,52 @@
+/* ============================================
+   ML Animations Design System — Animation Tokens
+   Easing, duration, and motion tokens for
+   educational ML/DL explanation animations
+
+   RUNTIME NOTE — strategy/motion_runtime.md
+   Export/capture-bound motion must be driven by JS
+   timer tweens that READ these tokens (CSS transition
+   clocks freeze under frame-stepped capture). The
+   --transition-* presets below are for live hover/
+   focus micro-interactions only.
+   ============================================ */
+
+:root {
+  /* ── Duration ── */
+  --duration-instant: 0ms; /* @kind other */
+  --duration-fast: 150ms; /* @kind other */
+  --duration-normal: 300ms; /* @kind other */
+  --duration-slow: 500ms; /* @kind other */
+  --duration-slower: 800ms; /* @kind other */
+  --duration-scene: 1200ms; /* @kind other */
+
+  /* ── Easing ── */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1); /* @kind other */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1); /* @kind other */
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* @kind other */
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.27, 1.55); /* @kind other */
+
+  /* ── Transition presets ── */
+  --transition-fade: opacity var(--duration-normal) var(--ease-default); /* @kind other */
+  --transition-slide: transform var(--duration-normal) var(--ease-out); /* @kind other */
+  --transition-scale: transform var(--duration-fast) var(--ease-spring); /* @kind other */
+  --transition-color: color var(--duration-fast) var(--ease-default),
+                      background-color var(--duration-fast) var(--ease-default),
+                      border-color var(--duration-fast) var(--ease-default); /* @kind other */
+
+  /* ── Animation scene presets ── */
+  --anim-stagger-delay: 80ms; /* @kind other */
+  --anim-fade-in-duration: var(--duration-normal); /* @kind other */
+  --anim-draw-duration: var(--duration-slow); /* @kind other */
+  --anim-morph-duration: var(--duration-slower); /* @kind other */
+  --anim-highlight-duration: var(--duration-normal); /* @kind other */
+
+  /* ── Shadows for depth in animations ── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-glow-brand: 0 0 20px rgba(83, 51, 225, 0.3);
+  --shadow-glow-teal: 0 0 20px rgba(18, 165, 148, 0.3);
+}

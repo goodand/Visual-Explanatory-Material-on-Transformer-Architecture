@@ -1,0 +1,265 @@
+/* ============================================
+   ML Animations Design System — Color Tokens
+   Based on DaleStudy/daleui color system
+   ============================================ */
+
+:root {
+  /* ── Base ── */
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+
+  /* ── Slate (Neutral Light) ── */
+  --color-slate-1: #F4F6F7;
+  --color-slate-2: #E3E8EA;
+  --color-slate-3: #CAD3D7;
+  --color-slate-4: #A4B4BC;
+  --color-slate-5: #A4B4BC;
+  --color-slate-6: #788D98;
+  --color-slate-7: #5D727D;
+  --color-slate-8: #505F6A;
+  --color-slate-9: #455159;
+  --color-slate-10: #3D464D;
+  --color-slate-11: #363C43;
+  --color-slate-12: #1C2024;
+
+  /* ── Dark Slate (Neutral Dark) ── */
+  --color-dark-slate-1: #111113;
+  --color-dark-slate-2: #18191B;
+  --color-dark-slate-3: #212225;
+  --color-dark-slate-4: #272A2D;
+  --color-dark-slate-5: #2E3135;
+  --color-dark-slate-6: #363A3F;
+  --color-dark-slate-7: #43484E;
+  --color-dark-slate-8: #5A6169;
+  --color-dark-slate-9: #696E77;
+  --color-dark-slate-10: #777B84;
+  --color-dark-slate-11: #B0B4BA;
+  --color-dark-slate-12: #EDEEF0;
+
+  /* ── Sage (Secondary Neutral Light) ── */
+  --color-sage-1: #FBFDFC;
+  --color-sage-2: #F7F9F8;
+  --color-sage-3: #EEF1F0;
+  --color-sage-4: #E6E9E8;
+  --color-sage-5: #DFE2E0;
+  --color-sage-6: #D7DAD9;
+  --color-sage-7: #CBCFCD;
+  --color-sage-8: #B8BCBA;
+  --color-sage-9: #868E8B;
+  --color-sage-10: #7C8481;
+  --color-sage-11: #5F6563;
+  --color-sage-12: #1A211E;
+
+  /* ── Dark Sage (Secondary Neutral Dark) ── */
+  --color-dark-sage-1: #0F1110;
+  --color-dark-sage-2: #161917;
+  --color-dark-sage-3: #1D211F;
+  --color-dark-sage-4: #2C312F;
+  --color-dark-sage-5: #3A403E;
+  --color-dark-sage-6: #4A524F;
+  --color-dark-sage-7: #5D6763;
+  --color-dark-sage-8: #707D78;
+  --color-dark-sage-9: #8B9792;
+  --color-dark-sage-10: #A9B4AE;
+  --color-dark-sage-11: #C7D1CB;
+  --color-dark-sage-12: #E1E7E3;
+
+  /* ── Violet (Brand Light) ── */
+  --color-violet-1: #FDFDFF;
+  --color-violet-2: #F7F8FF;
+  --color-violet-3: #EFF1FF;
+  --color-violet-4: #E3E7FF;
+  --color-violet-5: #D6DBFF;
+  --color-violet-6: #C7CCFF;
+  --color-violet-7: #B3B8FF;
+  --color-violet-8: #979AFF;
+  --color-violet-9: #5333E1;
+  --color-violet-10: #481ACF;
+  --color-violet-11: #32228D;
+  --color-violet-12: #2A2270;
+
+  /* ── Dark Violet (Brand Dark Alt) ── */
+  --color-dark-violet-1: #14121F;
+  --color-dark-violet-2: #1B1525;
+  --color-dark-violet-3: #291F43;
+  --color-dark-violet-4: #33255B;
+  --color-dark-violet-5: #3C2E69;
+  --color-dark-violet-6: #473876;
+  --color-dark-violet-7: #56468B;
+  --color-dark-violet-8: #6958AD;
+  --color-dark-violet-9: #6E56CF;
+  --color-dark-violet-10: #7D66D9;
+  --color-dark-violet-11: #BAA7FF;
+  --color-dark-violet-12: #E2DDFE;
+
+  /* ── Teal (Brand Dark) ── */
+  --color-teal-1: #FAFEFD;
+  --color-teal-2: #F3FBF9;
+  --color-teal-3: #E0F8F3;
+  --color-teal-4: #CCF3EA;
+  --color-teal-5: #B8EAE0;
+  --color-teal-6: #A1DED2;
+  --color-teal-7: #83CDC1;
+  --color-teal-8: #53B9AB;
+  --color-teal-9: #12A594;
+  --color-teal-10: #0D9B8A;
+  --color-teal-11: #008573;
+  --color-teal-12: #0D3D38;
+
+  /* ── Dark Teal ── */
+  --color-dark-teal-1: #0D1514;
+  --color-dark-teal-2: #111C1B;
+  --color-dark-teal-3: #0D2D2A;
+  --color-dark-teal-4: #023B37;
+  --color-dark-teal-5: #084843;
+  --color-dark-teal-6: #145750;
+  --color-dark-teal-7: #1C6961;
+  --color-dark-teal-8: #207E73;
+  --color-dark-teal-9: #12A594;
+  --color-dark-teal-10: #0EB39E;
+  --color-dark-teal-11: #0BD8B6;
+  --color-dark-teal-12: #ADF0DD;
+
+  /* ── Red (Danger) ── */
+  --color-red-1: #FFFCFC;
+  --color-red-2: #FFF7F7;
+  --color-red-3: #FEEBEC;
+  --color-red-4: #FFDBDC;
+  --color-red-5: #FFCDCE;
+  --color-red-6: #FDBDBE;
+  --color-red-7: #F4A9AA;
+  --color-red-8: #EB8E90;
+  --color-red-9: #E43F44;
+  --color-red-10: #D7292E;
+  --color-red-11: #CB2328;
+  --color-red-12: #641723;
+
+  /* ── Amber (Warning) ── */
+  --color-amber-1: #FEFDFB;
+  --color-amber-2: #FEFBE9;
+  --color-amber-3: #FFF7C2;
+  --color-amber-4: #FFEE9C;
+  --color-amber-5: #FBE577;
+  --color-amber-6: #F3D673;
+  --color-amber-7: #E9C162;
+  --color-amber-8: #E2A336;
+  --color-amber-9: #FFC53D;
+  --color-amber-10: #FFBA18;
+  --color-amber-11: #DD9E08;
+  --color-amber-12: #4F3422;
+
+  /* ── Blue (Info) ── */
+  --color-blue-1: #FBFDFF;
+  --color-blue-2: #F4FAFF;
+  --color-blue-3: #E6F4FE;
+  --color-blue-4: #D5EFFF;
+  --color-blue-5: #C2E5FF;
+  --color-blue-6: #ACD8FC;
+  --color-blue-7: #8EC8F6;
+  --color-blue-8: #5EB1EF;
+  --color-blue-9: #0090FF;
+  --color-blue-10: #0463AF;
+  --color-blue-11: #095190;
+  --color-blue-12: #113264;
+
+  /* ── Green (Success) ── */
+  --color-green-1: #FBFEFC;
+  --color-green-2: #F4FBF6;
+  --color-green-3: #E6F6EB;
+  --color-green-4: #D6F1DF;
+  --color-green-5: #C4E8D1;
+  --color-green-6: #ADDDC0;
+  --color-green-7: #8ECEAA;
+  --color-green-8: #5BB98B;
+  --color-green-9: #30A46C;
+  --color-green-10: #21784F;
+  --color-green-11: #1A6644;
+  --color-green-12: #193B2D;
+
+  /* ── Semantic: Foreground ── */
+  --fg-brand: var(--color-violet-9);
+  --fg-brand-hover: var(--color-violet-10);
+  --fg-brand-active: var(--color-violet-11);
+  --fg-neutral: var(--color-slate-9);
+  --fg-neutral-hover: var(--color-slate-10);
+  --fg-neutral-active: var(--color-slate-11);
+  --fg-neutral-placeholder: var(--color-slate-7);
+  --fg-neutral-disabled: var(--color-slate-7);
+  --fg-danger: var(--color-red-11);
+  --fg-success: var(--color-green-11);
+  --fg-warning: var(--color-amber-11);
+  --fg-info: var(--color-blue-11);
+
+  /* ── Semantic: Foreground Solid (on solid bg) ── */
+  --fg-solid-brand: var(--color-violet-1);
+  --fg-solid-neutral: var(--color-slate-1);
+  --fg-solid-danger: var(--color-red-1);
+  --fg-solid-success: var(--color-green-1);
+  --fg-solid-warning: var(--color-amber-12);
+  --fg-solid-info: var(--color-blue-1);
+
+  /* ── Semantic: Background ── */
+  --bg-app: var(--color-white);
+  --bg-brand: var(--color-violet-2);
+  --bg-brand-hover: var(--color-violet-3);
+  --bg-brand-active: var(--color-violet-4);
+  --bg-neutral: var(--color-white);
+  --bg-neutral-hover: var(--color-slate-2);
+  --bg-neutral-active: var(--color-slate-3);
+  --bg-neutral-disabled: var(--color-slate-5);
+  --bg-danger: var(--color-red-1);
+  --bg-danger-hover: var(--color-red-2);
+  --bg-danger-active: var(--color-red-3);
+  --bg-success: var(--color-green-1);
+  --bg-warning: var(--color-amber-1);
+  --bg-info: var(--color-blue-2);
+
+  /* ── Semantic: Background Solid ── */
+  --bg-solid-brand: var(--color-violet-9);
+  --bg-solid-brand-hover: var(--color-violet-10);
+  --bg-solid-brand-active: var(--color-violet-11);
+  --bg-solid-neutral: var(--color-slate-9);
+  --bg-solid-neutral-hover: var(--color-slate-10);
+  --bg-solid-neutral-active: var(--color-slate-11);
+  --bg-solid-neutral-disabled: var(--color-slate-5);
+  --bg-solid-danger: var(--color-red-10);
+  --bg-solid-danger-hover: var(--color-red-11);
+  --bg-solid-danger-active: var(--color-red-12);
+  --bg-solid-success: var(--color-green-10);
+  --bg-solid-warning: var(--color-amber-9);
+  --bg-solid-info: var(--color-blue-10);
+
+  /* ── Semantic: Border ── */
+  --border-brand: var(--color-violet-8);
+  --border-brand-active: var(--color-violet-9);
+  --border-brand-focus: var(--color-violet-10);
+  --border-neutral: var(--color-slate-5);
+  --border-neutral-hover: var(--color-slate-6);
+  --border-neutral-active: var(--color-slate-7);
+  --border-neutral-disabled: var(--color-slate-6);
+  --border-neutral-focus: var(--color-slate-3);
+  --border-danger: var(--color-red-9);
+  --border-success: var(--color-green-8);
+  --border-warning: var(--color-amber-7);
+  --border-info: var(--color-blue-9);
+
+  /* ── Animation-specific Colors ── */
+  --anim-bg-dark: #0F1110;
+  --anim-bg-light: #FAFBFC;
+  --anim-canvas: #1A1D21;
+  --anim-grid: rgba(255, 255, 255, 0.06);
+  --anim-axis: var(--color-slate-7);
+  --anim-vector-primary: var(--color-violet-8);
+  --anim-vector-secondary: var(--color-teal-8);
+  --anim-vector-tertiary: var(--color-amber-8);
+  --anim-highlight: var(--color-violet-9);
+  --anim-highlight-alt: var(--color-teal-9);
+  --anim-matrix-cell: var(--color-violet-3);
+  --anim-matrix-cell-active: var(--color-violet-7);
+  --anim-formula-text: var(--color-slate-12);
+  --anim-formula-accent: var(--color-violet-9);
+  --anim-node-fill: var(--color-violet-4);
+  --anim-node-stroke: var(--color-violet-8);
+  --anim-edge: var(--color-slate-6);
+  --anim-label: var(--color-slate-11);
+}

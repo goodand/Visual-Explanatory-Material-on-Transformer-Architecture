@@ -1,0 +1,38 @@
+/* ============================================
+   ML Animations Design System — Spacing Tokens
+   Based on DaleStudy/daleui spacing system
+   ============================================ */
+
+:root {
+  /* ── Spacing Scale ── */
+  --space-0: 0rem;
+  --space-1: 0.125rem;  /* 2px */
+  --space-2: 0.25rem;   /* 4px */
+  --space-3: 0.5rem;    /* 8px */
+  --space-4: 0.75rem;   /* 12px */
+  --space-5: 1rem;      /* 16px */
+  --space-6: 1.25rem;   /* 20px */
+  --space-7: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-9: 2.25rem;   /* 36px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-11: 3rem;     /* 48px */
+
+  /* ── Border Radii ── */
+  --radius-xs: 0.125rem; /* 2px */
+  --radius-sm: 0.25rem;  /* 4px */
+  --radius-md: 0.5rem;   /* 8px */
+  --radius-lg: 1rem;     /* 16px */
+  --radius-full: 9999px;
+
+  /* ── Border Widths ── */
+  --border-width-sm: 1px;
+  --border-width-md: 1.5px;
+  --border-width-lg: 2px;
+
+  /* ── Animation-specific Spacing ── */
+  --anim-canvas-padding: var(--space-8); /* @kind spacing */
+  --anim-element-gap: var(--space-5); /* @kind spacing */
+  --anim-label-offset: var(--space-3); /* @kind spacing */
+  --anim-axis-padding: var(--space-11); /* @kind spacing */
+}
