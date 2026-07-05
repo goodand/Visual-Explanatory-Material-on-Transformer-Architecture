@@ -19,14 +19,27 @@ React 18 · Babel Standalone · KaTeX · Pretendard/JetBrains Mono 폰트는 CDN
 - 상단 Unit 칩으로 단원 전환, LINKS 칩으로 씬 간 위키식 이동
 - 하단 5-Unit 프레임 칩 → 개념 프레임 오버레이
 
+## 페이지 (surface)
+
+| 페이지 | 파일 | 내용 |
+|--------|------|------|
+| Animation Player | `AI-ML Animation Player.html` | 11단원 씬 애니메이션 + 그래프 뷰 |
+| Transformer Anatomy | `transformer-anatomy/Transformer Anatomy.html` | 인터랙티브 해부도 (Z0→Z5 semantic zoom, Esc로 zoom-out) |
+
+두 페이지는 우상단 공통 네비게이션(`shared/surface-nav.js`)으로 1클릭 상호 이동합니다. Player의 씬 LINKS 칩은 해부도의 해당 레벨로 딥링크되고(`?level=…&from=…`), 해부도는 원래 씬으로 되돌아갑니다(`#u=NN&s=N`).
+
 ## 구성
 
 ```
-AI-ML Animation Player.html          엔트리포인트
+AI-ML Animation Player.html          Player 엔트리포인트
+transformer-anatomy/                 해부도 페이지 (HTML + anatomy-app/data + tweaks-panel)
+shared/surface-nav.js                공통 surface 네비게이션 (자기주입 vanilla JS)
 _ds/…/                               디자인 시스템 토큰(CSS) + 컴포넌트 번들
 animation-viewer/                    tween 엔진 + scene 시각화 (JSX)
 storyboard/data-unit01..11.js        11개 단원 씬 데이터
 ```
+
+> 해부도의 "📐 참조" 패널과 Zoom Plan 문서는 `storyboard/refs/`의 참조 이미지(논문 Fig 등)를 사용합니다. 이미지 세트는 이 저장소에 아직 포함되지 않아 참조 패널은 이미지 없이 동작합니다.
 
 ## 커리큘럼
 

@@ -1,0 +1,448 @@
+// Transformer Anatomy v2 — Level Data
+// v2 changes: L9 split, SwiGLU, dropout labels, cross-attn clarity,
+// output head training/inference, mask detail, embedding scaling note
+window.ANATOMY = {};
+
+window.ANATOMY.REF_IMAGES = {
+  L0: ['../storyboard/refs/transformer/L0-encoder-decoder.png',
+       '../storyboard/refs/transformer/L0-original-fig1.png'],
+  L1: '../storyboard/refs/transformer/L1-stacked.png',
+  'L2-enc': ['../storyboard/refs/transformer/L2-encoder-block.png',
+             '../storyboard/refs/transformer/L2-alammar-encoder.png'],
+  'L2-dec': '../storyboard/refs/transformer/L0-full-annotated.png',
+  'L3-self': '../storyboard/refs/transformer/attn-self-x.png',   // Z4.1 Q/K/V projection overview
+  'L3-cross': '../storyboard/refs/transformer/attn-cross-h.png', // Z4.1 (Cross)
+  'L3-masked': '../storyboard/refs/transformer/L6-causal-mask-matrix.png',
+  L4: '../storyboard/refs/transformer/L4-mha-internal.png',
+  L5: '../storyboard/refs/transformer/L5-scaled-dot-product.png', // Z6 SDPA 내부
+  AddNorm: '../storyboard/refs/transformer/L2-residual-connection.png',
+  // L7·L9a·L9b: P primitive — 전용 참조 이미지 없음 (attn-self-x는 Linear 단위 이미지 아님,
+  // attn-qkv-matrix는 Formula Lock 수식 장면)
+};
+
+// ── Source-corrected reference mappings (MHA container restructure) ──
+Object.assign(window.ANATOMY.REF_IMAGES, {
+  L0: ['../storyboard/refs/transformer/L0-original-fig1.png',
+       '../storyboard/refs/transformer/fig1-annotated-zoom.png'],
+  'L2-dec': ['../storyboard/refs/transformer/enc-dec-jalammar.png',
+             '../storyboard/refs/transformer/L0-full-annotated.png'],
+  'L3-self': ['../storyboard/refs/transformer/L4-mha-internal.png',
+              '../storyboard/refs/transformer/fig2-sdpa-mha-paper.png'],
+  'L3-masked': '../storyboard/refs/transformer/L4-mha-internal.png',
+  'L3-cross': ['../storyboard/refs/transformer/L4-mha-internal.png',
+               '../storyboard/refs/transformer/attn-cross-h.png'],
+  'L4-self': ['../storyboard/refs/transformer/attn-self-x.png',
+              '../storyboard/refs/transformer/L4-bert-head-patterns.png',
+              '../storyboard/refs/transformer/L4-head-heatmap-bipartite.png'],
+  'L4-masked': ['../storyboard/refs/transformer/attn-self-x.png',
+                '../storyboard/refs/transformer/L6-causal-mask-matrix.png'],
+  'L4-cross': '../storyboard/refs/transformer/attn-cross-h.png',
+  L5: ['../storyboard/refs/transformer/L5-scaled-dot-product.png',
+       '../storyboard/refs/transformer/L6-qkt-score-matrix-color.png'],
+});
+delete window.ANATOMY.REF_IMAGES.L4;
+
+// 이미지 출처 — 고유 색상 추출 분류 (paper Fig 파스텔+purple SDPA / jalammar 초록·분홍 테두리)
+window.ANATOMY.REF_SOURCES = {
+  'L0-original-fig1.png':   { k:'paper', label:'논문 Fig 1' },
+  'fig1-annotated-zoom.png':{ k:'paper', label:'논문 Fig 1 (annotated)' },
+  'L4-mha-internal.png':    { k:'paper', label:'논문 Fig 2 (MHA)' },
+  'fig2-sdpa-mha-paper.png':{ k:'paper', label:'논문 Fig 2' },
+  'L5-scaled-dot-product.png':{ k:'paper', label:'논문 Fig 2 (SDPA)' },
+  'L2-alammar-encoder.png': { k:'jalammar', label:'Illustrated Transformer' },
+  'enc-dec-jalammar.png':   { k:'jalammar', label:'Illustrated Transformer' },
+  'L1-stacked.png':         { k:'jalammar', label:'Illustrated 스타일' },
+  'L2-residual-connection.png':{ k:'other', label:'ResNet 원도' },
+  'L4-bert-head-patterns.png':{ k:'other', label:'BERT head 분석' },
+  'L4-head-heatmap-bipartite.png':{ k:'other', label:'attention 논문' },
+  'L6-causal-mask-matrix.png':{ k:'other', label:'교육 자료' },
+  'L6-qkt-score-matrix-color.png':{ k:'other', label:'교육 자료' },
+  'L0-full-annotated.png':  { k:'other', label:'커스텀 annotated' },
+  'L2-encoder-block.png':   { k:'other', label:'커스텀' },
+  'attn-self-x.png':        { k:'other', label:'수식 계보도' },
+  'attn-cross-h.png':       { k:'other', label:'수식 계보도' },
+};
+
+// Shape notation: [batch, seq, dim] or description
+window.S = {
+  emb: '(B, S, d_model)',
+  qkv: '(B, S, d_model)',
+  head: '(B, h, S, d_k)',
+  score: '(B, h, S, S)',
+  attn: '(B, h, S, d_k)',
+  ff_up: '(B, S, d_ff)',
+  ff_down: '(B, S, d_model)',
+  logits: '(B, S, |V|)',
+  prob: '(B, S, |V|)',
+};
+
+window.ANATOMY.LEVELS = {
+  L0: {
+    id:'L0', z:'Z0', title:'Transformer', titleKo:'전체 아키텍처',
+    desc:'Encoder ⇄ Decoder · 가장 추상적 view',
+    blocks:[
+      { id:'inp', label:'Inputs', color:'teal', y:0, x:0 },
+      { id:'enc', label:'Encoder', color:'teal', zoom:'L1', y:1, x:0,
+        desc:'Input → N layers → Encoder Memory' },
+      { id:'tgt', label:'Outputs\n(shifted right)', color:'amber', y:0, x:2 },
+      { id:'dec', label:'Decoder', color:'amber', zoom:'L1', y:1, x:2,
+        desc:'Target + Memory → N layers → Output' },
+      { id:'out', label:'Output\nProbabilities', color:'amber', y:2, x:2 },
+    ],
+    arrows:[
+      { from:'inp', to:'enc', shape:S.emb },
+      { from:'enc', to:'dec', label:'Memory\n(K, V)', shape:'(B, S_src, d_model)', cross:true },
+      { from:'tgt', to:'dec', shape:S.emb },
+      { from:'dec', to:'out', shape:S.prob },
+    ],
+  },
+
+  L1: {
+    id:'L1', z:'Z1', title:'Encoder–Decoder Stack ×N', titleKo:'인코더·디코더 스택 (통합)',
+    desc:'Encoder ×N 최종 출력(Memory)이 모든 Decoder layer의 Cross-Attn으로 fan-out — Input Pipeline·Output Head 포함 (Z1)',
+    parent:'L0',
+    layout:'l1',
+    enc:{
+      caption:'Inputs',
+      pipeline:[
+        { id:'e-emb', label:'Input\nEmbedding', color:'teal',
+          desc:'E[id] lookup · ×√d_model(원 논문 옵션) · Dropout(train only)' },
+        { id:'e-pe', label:'+ Positional\nEncoding', color:'teal', desc:'sin/cos 고정 위치 벡터' },
+      ],
+      layers:4,
+      layerBlock:{ label:'Encoder', color:'teal', zoom:'L2-enc',
+        desc:'클릭: layer 내부 — Self-Attn → Add&Norm → FFN → Add&Norm' },
+    },
+    dec:{
+      caption:'Outputs\n(shifted right)',
+      capTop:'Output Probabilities',
+      pipeline:[
+        { id:'d-emb', label:'Output\nEmbedding', color:'amber',
+          desc:'Target E[id] · ×√d_model · Dropout(train only)' },
+        { id:'d-pe', label:'+ Positional\nEncoding', color:'amber', reuse:'same op' },
+      ],
+      layers:4,
+      layerBlock:{ label:'Decoder', color:'amber', zoom:'L2-dec',
+        desc:'클릭: layer 내부 — Masked Self → Cross(Memory) → FFN' },
+      head:[
+        { id:'d-linear', label:'Linear', color:'amber', prim:'P1',
+          desc:'d_model → |V| · bias=True', postprocess:'none' },
+        { id:'d-softmax', label:'Softmax', color:'amber', trainInf:true,
+          desc:'Training: logits→CE Loss(softmax 내장) / Inference: softmax→token 선택' },
+      ],
+    },
+  },
+
+  'L2-enc': {
+    id:'L2-enc', z:'Z2', title:'Encoder Layer', titleKo:'인코더 레이어 내부',
+    desc:'Attention = token mixing (동적 가중합) · FFN = feature transformation (고정 weight 변환)\nPost-LN: Sublayer→Drop→+x→LN / Pre-LN: LN→Sublayer→Drop→+x (Tweak)',
+    parent:'L1-enc',
+    blocks:[
+      { id:'mha', label:'Multi-Head\nSelf-Attention', color:'teal', zoom:'L3-self',
+        desc:'Q=K=V=X + Padding Mask · 토큰 간 정보 교환 (가로 방향) — 참조 그림의 넓은 단일 박스' },
+      { id:'ffn', label:'Feed Forward\n(FFN)', color:'violet', zoom:'L8',
+        desc:'Linear₁→Act→Drop→Linear₂ · 토큰별 독립 적용(position-wise) — 참조 그림에서 토큰마다 FF 박스가 따로 그려지는 이유' },
+      { id:'an1', label:'Add & Norm', color:'slate', zoom:'AddNorm',
+        desc:'내부: Dropout → + x → LayerNorm — 클릭해서 보기' },
+      { id:'an2', label:'Add & Norm', color:'slate', zoom:'AddNorm',
+        reuse:'same op', desc:'FFN 뒤 동일 후처리 — 내부: Dropout → + x → LayerNorm' },
+      { id:'pln1', label:'LayerNorm', color:'slate', desc:'Pre-LN: sublayer 앞에서 먼저 정규화' },
+      { id:'pln2', label:'LayerNorm', color:'slate', reuse:'same op' },
+      { id:'da1', label:'Add', color:'slate', zoom:'AddNorm',
+        desc:'내부: Dropout → + x (Pre-LN은 Norm이 sublayer 앞)' },
+      { id:'da2', label:'Add', color:'slate', zoom:'AddNorm', reuse:'same op' },
+    ],
+    groups:{
+      'Post-LN':[ {ids:['mha','an1']}, {ids:['ffn','an2']} ],
+      'Pre-LN': [ {ids:['pln1','mha','da1']}, {ids:['pln2','ffn','da2']} ],
+    },
+    preNote:'Pre-LN: stack 끝에 Final LayerNorm 필요 (L1 참조)',
+    arrows:[],
+  },
+
+  'L2-dec': {
+    id:'L2-dec', z:'Z2', title:'Decoder Layer', titleKo:'디코더 레이어 내부',
+    desc:'Attention = token mixing · FFN = feature transformation\nMasked Self-Attn → Cross-Attn → FFN · 각 sublayer마다 Add&Norm',
+    parent:'L1-dec',
+    blocks:[
+      { id:'masked', label:'Masked Multi-Head\nSelf-Attention', color:'amber', zoom:'L3-masked',
+        desc:'Q/K/V ← Decoder Y (self) + Causal Mask' },
+      { id:'cross', label:'Encoder-Decoder\nAttention', color:'amber', zoom:'L3-cross',
+        desc:'Cross-Attention: Q ← Decoder state, K/V ← Encoder output\nscore: (B,T,S) — T=decoder len, S=encoder len' },
+      { id:'ffn', label:'Feed Forward', color:'violet', zoom:'L8', reuse:'same type' },
+      { id:'an1', label:'Add & Norm\n(+ x₀)', color:'slate', zoom:'AddNorm',
+        desc:'내부: Dropout → + x₀ → LayerNorm' },
+      { id:'an2', label:'Add & Norm\n(+ x₁)', color:'slate', zoom:'AddNorm', reuse:'same op',
+        desc:'내부: Dropout → + x₁ → LayerNorm' },
+      { id:'an3', label:'Add & Norm\n(+ x₂)', color:'slate', zoom:'AddNorm', reuse:'same op',
+        desc:'내부: Dropout → + x₂ → LayerNorm' },
+      { id:'pln1', label:'LayerNorm', color:'slate', desc:'Pre-LN: sublayer 앞 정규화' },
+      { id:'pln2', label:'LayerNorm', color:'slate', reuse:'same op' },
+      { id:'pln3', label:'LayerNorm', color:'slate', reuse:'same op' },
+      { id:'da1', label:'Add', color:'slate', zoom:'AddNorm',
+        desc:'내부: Dropout → + x' },
+      { id:'da2', label:'Add', color:'slate', zoom:'AddNorm', reuse:'same op' },
+      { id:'da3', label:'Add', color:'slate', zoom:'AddNorm', reuse:'same op' },
+    ],
+    groups:{
+      'Post-LN':[ {ids:['masked','an1']}, {ids:['cross','an2']}, {ids:['ffn','an3']} ],
+      'Pre-LN': [ {ids:['pln1','masked','da1']}, {ids:['pln2','cross','da2']}, {ids:['pln3','ffn','da3']} ],
+    },
+    preNote:'Pre-LN: stack 끝에 Final LayerNorm 필요 (L1 참조)',
+    arrows:[],
+  },
+
+  AddNorm: {
+    id:'AddNorm', z:'Z3', title:'Add & Norm', titleKo:'잔차 연결 + 정규화',
+    desc:'Post-LN: LN(x + Dropout(F(x))) · ResNet과 달리 ⊕ 뒤 activation 없음 — relu/GELU는 FFN 내부(L8)',
+    parent:'L2-enc',
+    blocks:[
+      { id:'x', label:'x\n(sublayer 입력)', color:'slate',
+        desc:'여기서 두 갈래: ① sublayer 경로 → F(x) ② identity skip 경로 → Add' },
+      { id:'fx', label:'Sublayer F(x)', color:'violet',
+        desc:'참조 그림의 weight layer 2개가 이 안에 접혀 있음 — FFN일 때 F(x) = Linear₁→Act→Linear₂, Attention일 때는 MHA — 어느 쪽인지는 상위 Z2에서 결정되므로 여기선 자리표시' },
+      { id:'drop', label:'Dropout', color:'slate', trainOnly:true,
+        desc:'Sublayer output dropout — residual add 전에 적용' },
+      { id:'add', label:'⊕  F(x) + x', color:'teal',
+        desc:'왼쪽 identity skip으로 넘어온 x가 직접 더해짐 — gradient 고속도로' },
+      { id:'ln', label:'LayerNorm', color:'violet',
+        desc:'(x−μ)/σ × γ + β — ResNet은 이 자리에 relu, Transformer는 LayerNorm (activation 없음)' },
+      { id:'lnp', label:'LayerNorm (pre)', color:'violet',
+        desc:'Pre-LN: sublayer 입력을 먼저 정규화 — skip은 LN 이전의 x' },
+    ],
+    groups:{
+      'Post-LN':[ {ids:['x','fx','drop','add'], skipLabel:'x identity'}, {ids:['ln'], skip:false} ],
+      'Pre-LN': [ {ids:['x','lnp','fx','drop','add'], skipLabel:'x identity'} ],
+    },
+    arrows:[],
+  },
+
+  // ── L3 = Multi-Head Attention CONTAINER (paper Fig 2 우측 패널) ──
+  // 클릭 순서: L2 layer → L3 MHA 컨테이너 → L4 단일 head → L5 SDPA 커널
+  'L3-self': {
+    id:'L3-self', z:'Z3', title:'Multi-Head Self-Attention', titleKo:'멀티헤드 셀프 어텐션 (컨테이너)',
+    desc:'하나의 X를 h개 head가 병렬로 봄 → 각 head = Self-Attention → Concat → W_O. Scaled Dot-Product 블록 클릭 시 단일 head로 확대',
+    parent:'L2-enc', layout:'graph',
+    taxonomy:{ scope:'Self', head:'Multi-Head (×h)', kernel:'Scaled Dot-Product' },
+    blocks:[
+      { id:'x', label:'X', color:'teal', desc:'Q·K·V 모두 같은 X에서 나옴 = self' },
+      { id:'wq', label:'Linear\nW_Q', color:'violet', stacked:true, prim:'P1', postprocess:'none', desc:'head마다 다른 W_Q ×h — 서로 다른 관점' },
+      { id:'wk', label:'Linear\nW_K', color:'violet', stacked:true, prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'wv', label:'Linear\nW_V', color:'violet', stacked:true, prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'heads', label:'Attention\nHeads', color:'violet', stacked:true, headCount:true, zoom:'L4-self', desc:'h개의 head가 병렬로 Scaled Dot-Product Attention을 수행 — 클릭: head 하나의 내부 구조 보기' },
+      { id:'concat', label:'Concat', color:'slate', desc:'h개 head 출력 z₁…zₕ 이어붙임 → d_model' },
+      { id:'wo', label:'Linear\nW_O', color:'violet', prim:'P1', postprocess:'none', desc:'합친 정보를 다시 d_model로 정리' },
+      { id:'out', label:'MHA Output', color:'teal', desc:'(B, S, d_model) — 문맥이 섞인 X' },
+    ],
+    rows:[ ['x'], ['wq','wk','wv'], ['heads'], ['concat'], ['wo'], ['out'] ],
+    edges:[ ['x','wq'],['x','wk'],['x','wv'],
+      ['wq','heads','Q'],['wk','heads','K'],['wv','heads','V'],
+      ['heads','concat','z₁…zₕ'],['concat','wo'],['wo','out'] ],
+    arrows:[],
+  },
+
+  'L3-masked': {
+    id:'L3-masked', z:'Z3', title:'Masked Multi-Head Self-Attention', titleKo:'마스크드 멀티헤드 셀프 어텐션',
+    desc:'Self 컨테이너와 동일 구조 + score에 Causal+Padding Mask. head 클릭 시 단일 head',
+    parent:'L2-dec', layout:'graph',
+    taxonomy:{ scope:'Masked Self', head:'Multi-Head (×h)', kernel:'Scaled Dot-Product' },
+    blocks:[
+      { id:'y', label:'Y (decoder)', color:'amber', desc:'Q·K·V 모두 decoder 상태에서 = self' },
+      { id:'wq', label:'Linear\nW_Q', color:'violet', stacked:true, prim:'P1', postprocess:'none' },
+      { id:'wk', label:'Linear\nW_K', color:'violet', stacked:true, prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'wv', label:'Linear\nW_V', color:'violet', stacked:true, prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'mask', label:'Causal + Pad\nMask', color:'red', desc:'미래 토큰 차단 — score에 −∞ 추가 (Self와의 유일한 차이)' },
+      { id:'heads', label:'Attention\nHeads', color:'violet', stacked:true, headCount:true, zoom:'L4-masked', desc:'h개 head가 병렬로 SDPA 수행 + mask 적용 — 클릭: head 하나의 내부 구조 보기' },
+      { id:'concat', label:'Concat', color:'slate' },
+      { id:'wo', label:'Linear\nW_O', color:'violet', prim:'P1', postprocess:'none' },
+      { id:'out', label:'MHA Output', color:'amber' },
+    ],
+    rows:[ ['y'], ['wq','wk','wv'], ['mask','heads'], ['concat'], ['wo'], ['out'] ],
+    edges:[ ['y','wq'],['y','wk'],['y','wv'],
+      ['wq','heads','Q'],['wk','heads','K'],['wv','heads','V'],['mask','heads'],
+      ['heads','concat','z₁…zₕ'],['concat','wo'],['wo','out'] ],
+    arrows:[],
+  },
+
+  'L3-cross': {
+    id:'L3-cross', z:'Z3', title:'Encoder-Decoder Multi-Head Attention', titleKo:'인코더-디코더 멀티헤드 어텐션',
+    desc:'Cross-Attention · Q from Decoder, K/V from Encoder\n= h개의 Cross-Attention Head 병렬 → Concat → W_O\nW_Q·W_K·W_V 모두 decoder parameter',
+    parent:'L2-dec', layout:'graph',
+    taxonomy:{ scope:'Cross (Encoder–Decoder)', head:'Multi-Head (×h)', kernel:'Scaled Dot-Product' },
+    blocks:[
+      { id:'dec', label:'Decoder\nHidden States\n(B,T,d_model)', color:'amber', desc:'→ W_Q → Q (decoder의 현재 위치에서 질문)' },
+      { id:'mem', label:'Encoder\nOutput H\n(B,S,d_model)', color:'teal', desc:'→ W_K → K, W_V → V (encoder가 읽어둔 입력 정보)' },
+      { id:'wq', label:'Linear\nW_Q', color:'violet', stacked:true, prim:'P1', postprocess:'none' },
+      { id:'wk', label:'Linear\nW_K', color:'violet', stacked:true, prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'wv', label:'Linear\nW_V', color:'violet', stacked:true, prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'heads', label:'Attention\nHeads ×h\neach: SDPA(Qᵢ,Kᵢ,Vᵢ)', color:'violet', stacked:true, headCount:true, zoom:'L4-cross', desc:'h개 head가 병렬로 Cross-Attention SDPA 수행 — 클릭: head 하나의 내부 구조 보기' },
+      { id:'concat', label:'Concat', color:'slate' },
+      { id:'wo', label:'Linear\nW_O', color:'violet', prim:'P1', postprocess:'none' },
+      { id:'out', label:'MHA Output', color:'violet' },
+    ],
+    rows:[ ['dec','mem'], ['wq','wk','wv'], ['heads'], ['concat'], ['wo'], ['out'] ],
+    edges:[ ['dec','wq'],['mem','wk'],['mem','wv'],
+      ['wq','heads','Q'],['wk','heads','K'],['wv','heads','V'],
+      ['heads','concat','z₁…zₕ'],['concat','wo'],['wo','out'] ],
+    arrows:[],
+  },
+
+  // ── L4 = 단일 attention head (컨테이너 안의 한 head) ──
+  'L4-self': {
+    id:'L4-self', z:'Z4', title:'Single Self-Attention Head', titleKo:'단일 셀프 어텐션 head',
+    desc:'head i: Q/K/V projection → SDPA → zᵢ\nQ ← X · K ← X · V ← X (Self: 같은 시퀀스)',
+    parent:'L3-self', layout:'graph',
+    slotTable:{ Q:'Encoder X', K:'Encoder X', V:'Encoder X' },
+    blocks:[
+      { id:'x', label:'X\n(B,S,d_model)', color:'teal', desc:'이 head의 입력 — Q·K·V 모두 같은 X에서 나옴 = Self' },
+      { id:'wq', label:'Linear W_Qⁱ\n→ Qᵢ', color:'violet', prim:'P1', postprocess:'none', desc:'이 head 전용 Q projection (d_model → d_k)' },
+      { id:'wk', label:'Linear W_Kⁱ\n→ Kᵢ', color:'violet', prim:'P1', postprocess:'none', reuse:'Linear op', desc:'K projection (d_model → d_k)' },
+      { id:'wv', label:'Linear W_Vⁱ\n→ Vᵢ', color:'violet', prim:'P1', postprocess:'none', reuse:'Linear op', desc:'V projection (d_model → d_v)' },
+      { id:'sdpa', label:'Scaled Dot-Product\nAttention', color:'violet', zoom:'L5',
+        desc:'softmax(QᵢKᵢᵀ/√d_k)Vᵢ — 클릭: 내부 계산 단계' },
+      { id:'z', label:'zᵢ (head 출력)', color:'teal', desc:'→ Concat으로 합쳐짐' },
+    ],
+    rows:[ ['x'], ['wq','wk','wv'], ['sdpa'], ['z'] ],
+    edges:[ ['x','wq'],['x','wk'],['x','wv'],
+      ['wq','sdpa','Qᵢ'],['wk','sdpa','Kᵢ'],['wv','sdpa','Vᵢ'],
+      ['sdpa','z'] ],
+    arrows:[],
+  },
+
+  'L4-masked': {
+    id:'L4-masked', z:'Z4', title:'Single Masked Head', titleKo:'단일 마스크드 head',
+    desc:'Self head + Causal Mask\nQ ← Y · K ← Y · V ← Y (Self: decoder 내부)',
+    parent:'L3-masked', layout:'graph',
+    slotTable:{ Q:'Decoder Y', K:'Decoder Y', V:'Decoder Y' },
+    blocks:[
+      { id:'y', label:'Y\n(B,T,d_model)', color:'amber', desc:'decoder 상태 — Q·K·V 모두 Y에서 = Self' },
+      { id:'wq', label:'Linear W_Qⁱ\n→ Qᵢ', color:'violet', prim:'P1', postprocess:'none' },
+      { id:'wk', label:'Linear W_Kⁱ\n→ Kᵢ', color:'violet', prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'wv', label:'Linear W_Vⁱ\n→ Vᵢ', color:'violet', prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'mask', label:'Causal\nMask', color:'red', desc:'미래 위치 −∞' },
+      { id:'sdpa', label:'Scaled Dot-Product\nAttention', color:'amber', zoom:'L5',
+        desc:'softmax(QᵢKᵢᵀ/√d_k + mask)Vᵢ' },
+      { id:'z', label:'zᵢ', color:'amber' },
+    ],
+    rows:[ ['y'], ['wq','wk','wv'], ['mask','sdpa'], ['z'] ],
+    edges:[ ['y','wq'],['y','wk'],['y','wv'],
+      ['wq','sdpa','Qᵢ'],['wk','sdpa','Kᵢ'],['mask','sdpa'],['wv','sdpa','Vᵢ'],
+      ['sdpa','z'] ],
+    arrows:[],
+  },
+
+  'L4-cross': {
+    id:'L4-cross', z:'Z4', title:'Single Cross-Attention Head', titleKo:'단일 크로스 어텐션 head',
+    desc:'one head: Qᵢ from Decoder, Kᵢ/Vᵢ from Encoder\nSDPA(Qᵢ,Kᵢ,Vᵢ) → zᵢ',
+    parent:'L3-cross', layout:'graph',
+    slotTable:{ Q:'Decoder state', K:'Encoder output', V:'Encoder output' },
+    blocks:[
+      { id:'dec', label:'Decoder s\n(B,T,d_model)', color:'amber', desc:'→ Q: decoder의 현재 질문' },
+      { id:'mem', label:'Encoder H\n(B,S,d_model)', color:'teal', desc:'→ K,V: encoder가 읽어둔 입력 문장 정보' },
+      { id:'wq', label:'Linear W_Qⁱ\n→ Qᵢ', color:'violet', prim:'P1', postprocess:'none' },
+      { id:'wk', label:'Linear W_Kⁱ\n→ Kᵢ', color:'violet', prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'wv', label:'Linear W_Vⁱ\n→ Vᵢ', color:'violet', prim:'P1', postprocess:'none', reuse:'Linear op' },
+      { id:'sdpa', label:'Scaled Dot-Product\nAttention\nQKᵀ: (B,T,S)', color:'violet', zoom:'L5',
+        desc:'cross score: (B,T,d_k)·(B,d_k,S)→(B,T,S)\nT=decoder len, S=encoder len' },
+      { id:'z', label:'zᵢ', color:'violet' },
+    ],
+    rows:[ ['dec','mem'], ['wq','wk','wv'], ['sdpa'], ['z'] ],
+    edges:[ ['dec','wq'],['mem','wk'],['mem','wv'],
+      ['wq','sdpa','Qᵢ'],['wk','sdpa','Kᵢ'],['wv','sdpa','Vᵢ'],
+      ['sdpa','z'] ],
+    arrows:[],
+  },
+
+  L5: {
+    id:'L5', z:'Z5', title:'Scaled Dot-Product Attention', titleKo:'스케일드 닷 프로덕트',
+    desc:'Attention(Q,K,V) = softmax(QKᵀ/√d_k)·V',
+    parent:'L4-self', layout:'graph',
+    blocks:[
+      { id:'q', label:'Qᵢ', color:'teal', desc:'Query — head i의 질문 벡터 (B,S,d_k)' },
+      { id:'k', label:'Kᵢ', color:'teal', desc:'Key — head i의 키 벡터 (B,S,d_k)' },
+      { id:'v', label:'Vᵢ', color:'teal', desc:'Value — head i의 값 벡터 (B,S,d_v)' },
+      { id:'mm1', label:'MatMul\n(Q·Kᵀ)\n(B,S,d_k)·(B,d_k,S)\n→ (B,S,S)', color:'violet', desc:'Q와 K의 내적 → token-to-token score matrix (S×S)' },
+      { id:'scl', label:'Scale\n(÷√d_k)', color:'slate', desc:'score를 √d_k로 나눠 gradient 안정화' },
+      { id:'mask', label:'Mask\n(opt)', color:'red',
+        desc:'score에 −∞ 또는 큰 음수 추가 → softmax 후 0' },
+      { id:'sm', label:'Softmax\n→ Aᵢ (B,S,S)', color:'violet', prim:'P3',
+        desc:'Row-wise → attention weight Σ=1 · S×S = token간 참조 비중' },
+      { id:'drop', label:'Dropout', color:'slate', trainOnly:true,
+        desc:'Attention weight dropout (training only)' },
+      { id:'mm2', label:'MatMul\n(Aᵢ·Vᵢ)\n(B,S,S)·(B,S,d_v)\n→ (B,S,d_v)', color:'violet', desc:'가중합 → context 벡터 zᵢ' },
+    ],
+    rows:[ ['q','k','v'], ['mm1'], ['scl'], ['mask'], ['sm'], ['drop'], ['mm2'] ],
+    edges:[
+      ['q','mm1','Q'], ['k','mm1','Kᵀ'],
+      ['mm1','scl'], ['scl','mask'], ['mask','sm'],
+      ['sm','drop'], ['drop','mm2','weights'],
+      ['v','mm2','V','elbow'],
+    ],
+    arrows:[],
+  },
+
+  L7: {
+    id:'L7', z:'P1', sideOnly:true, title:'Linear Layer', titleKo:'선형 변환 (공용 primitive)',
+    desc:'y = xW + b · bias=True(기본) · Output Head·MHA·FFN 등 여러 깊이에서 재사용 (P1)',
+    parent:'L3-self',
+    blocks:[
+      { id:'in', label:'Input x', color:'slate' },
+      { id:'w', label:'W + b', color:'violet', desc:'학습 파라미터' },
+      { id:'mul', label:'xW + b', color:'violet' },
+      { id:'pp', label:'Post-process\n(badge)', color:'slate',
+        desc:'none / ReLU / GELU / SwiGLU / Softmax' },
+    ],
+    arrows:[
+      { from:'in', to:'mul' }, { from:'w', to:'mul' }, { from:'mul', to:'pp' },
+    ],
+  },
+
+  L8: {
+    id:'L8', z:'Z3', title:'Feed Forward Network', titleKo:'피드포워드 네트워크',
+    desc:'Linear₁ → Activation → Dropout → Linear₂',
+    parent:'L2-enc',
+    blocks:[
+      { id:'lin1', label:'Linear₁\n(d→d_ff)', color:'violet', prim:'P1',
+        desc:'확장 d_model → d_ff (×4)' },
+      { id:'act', label:'Activation', color:'violet', prim:'P2',
+        desc:'ReLU(원논문) / GELU(BERT·GPT) / SwiGLU(최신 LLM)' },
+      { id:'drop', label:'Dropout', color:'slate', trainOnly:true,
+        desc:'FFN 내부 dropout (v2 확인)' },
+      { id:'lin2', label:'Linear₂\n(d_ff→d)', color:'violet', prim:'P1',
+        postprocess:'none' },
+    ],
+    arrows:[
+      { from:'lin1', to:'act', shape:S.ff_up },
+      { from:'act', to:'drop', shape:S.ff_up },
+      { from:'drop', to:'lin2', shape:S.ff_up },
+    ],
+  },
+
+  L9a: {
+    id:'L9a', z:'P2', sideOnly:true, title:'Scalar Activation', titleKo:'스칼라 활성화 함수 (공용 primitive)',
+    desc:'z → f(z) · 원소별 비선형 변환',
+    parent:'L8',
+    blocks:[
+      { id:'z', label:'z', color:'slate' },
+      { id:'fn', label:'f(z)', color:'violet',
+        desc:'ReLU: max(0,z)\nGELU: z·Φ(z)\nSwiGLU: Swish(xW₁)⊙(xW₂)\nsigmoid / tanh' },
+      { id:'out', label:'f(z)', color:'slate' },
+    ],
+    arrows:[ { from:'z', to:'fn' }, { from:'fn', to:'out' } ],
+  },
+
+  L9b: {
+    id:'L9b', z:'P3', sideOnly:true, title:'Distribution Function', titleKo:'분포 함수 — Softmax (공용 primitive)',
+    desc:'벡터 → 확률 분포 (합=1) · SDPA(Z5)·Output Head(Z1)에서 재사용 (P3)',
+    parent:'L5',
+    blocks:[
+      { id:'scores', label:'Score vector\n[s₁, s₂, …]', color:'slate' },
+      { id:'exp', label:'exp(sᵢ)', color:'violet' },
+      { id:'norm', label:'÷ Σexp', color:'violet' },
+      { id:'dist', label:'[p₁, p₂, …]\nΣ = 1', color:'violet' },
+    ],
+    arrows:[
+      { from:'scores', to:'exp' }, { from:'exp', to:'norm' }, { from:'norm', to:'dist' },
+    ],
+  },
+};
