@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transformer Zoom Plan — Z/P 2축 체계</title>
+<link rel="stylesheet" href="_ds/ml-animations-design-system-94795768-6cca-4336-8dca-6ececad5a6ab/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/ml-animations-design-system-94795768-6cca-4336-8dca-6ececad5a6ab/tokens/colors.css">
+<link rel="stylesheet" href="_ds/ml-animations-design-system-94795768-6cca-4336-8dca-6ececad5a6ab/tokens/typography.css">
+<link rel="stylesheet" href="_ds/ml-animations-design-system-94795768-6cca-4336-8dca-6ececad5a6ab/tokens/spacing.css">
+<style>
+  :root { --accent: var(--color-violet-9); --accent-bg: var(--color-violet-2); }
+  html,body { margin:0; padding:0; background: var(--color-sage-1); }
+  body { font-family: var(--font-sans); color: var(--color-slate-12); max-width: 1000px; margin: 0 auto; padding: 40px 32px 120px; }
+  h1 { font-size: var(--font-size-3xl); font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
+  .sub { font-size: var(--font-size-sm); color: var(--color-slate-8); margin-bottom: 32px; }
+  h2 { font-size: var(--font-size-xl); font-weight: 700; margin: 40px 0 16px; border-bottom: 2px solid var(--color-slate-3); padding-bottom: 8px; }
+  h3 { font-size: var(--font-size-lg); font-weight: 600; margin: 28px 0 10px; }
+
+  /* ── Tree ── */
+  .tree { font-family: var(--font-mono); font-size: 13px; line-height: 2.2; background: var(--color-white); border: 1px solid var(--color-slate-3); border-radius: 12px; padding: 24px 28px; overflow-x: auto; }
+  .tree .lvl { display: inline-block; min-width: 32px; font-weight: 700; color: var(--accent); background: var(--accent-bg); border-radius: 999px; text-align: center; font-size: 11px; padding: 1px 8px; margin-right: 8px; }
+  .tree .pvl { display: inline-block; min-width: 32px; font-weight: 700; color: var(--color-amber-11); background: var(--color-amber-2); border-radius: 999px; text-align: center; font-size: 11px; padding: 1px 8px; margin-right: 8px; }
+  .tree .tag { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 999px; margin-left: 6px; }
+  .tree .tag-enc { background: var(--color-teal-2); color: var(--color-teal-11); }
+  .tree .tag-dec { background: var(--color-amber-2); color: var(--color-amber-11); }
+  .tree .tag-shared { background: var(--color-slate-2); color: var(--color-slate-9); }
+  .tree .tag-reuse { background: var(--color-blue-2); color: var(--color-blue-11); }
+  .tree .note { color: var(--color-slate-7); font-size: 11.5px; font-family: var(--font-sans); }
+
+  /* ── Level table ── */
+  .ltable { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .ltable th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-slate-7); padding: 8px 10px; border-bottom: 2px solid var(--color-slate-3); }
+  .ltable td { padding: 10px; border-bottom: 1px solid var(--color-slate-2); vertical-align: top; }
+  .zlink{text-decoration:none}
+.zlink:hover span{filter:brightness(1.2);transform:scale(1.1);display:inline-block}
+.ltable .lv { font-family: var(--font-mono); font-weight: 700; color: var(--accent); background: var(--accent-bg); border-radius: 999px; padding: 2px 8px; font-size: 11px; white-space: nowrap; }
+  .ltable .pv { font-family: var(--font-mono); font-weight: 700; color: var(--color-amber-11); background: var(--color-amber-2); border-radius: 999px; padding: 2px 8px; font-size: 11px; white-space: nowrap; }
+  .ltable .scope { font-weight: 600; }
+  .ltable .units { font-family: var(--font-mono); font-size: 11px; color: var(--color-slate-8); }
+  .ltable .ref-thumb { width: 80px; height: 54px; object-fit: contain; border-radius: 4px; border: 1px solid var(--color-slate-3); background: #fff; }
+
+  /* ── Gallery ── */
+  .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .gallery figure { margin: 0; background: var(--color-white); border: 1px solid var(--color-slate-3); border-radius: 8px; overflow: hidden; }
+  .gallery img { width: 100%; display: block; }
+  .gallery figcaption { padding: 8px 10px; font-size: 11px; color: var(--color-slate-11); font-weight: 500; }
+  .gallery .flvl { font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--accent); }
+
+  @media (max-width: 700px) { .gallery { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>Transformer Zoom Plan</h1>
+<p class="sub">구성 단위 Tree — Z(zoom 깊이 Z0–Z5) + P(재사용 primitive P1–P3) 2축 체계 · 참조 이미지 · Unit/Scene 매핑</p>
+
+<!-- ════════════════════════════════════════ -->
+<h2>1. Component Tree — 실제 zoom 단계 도출</h2>
+
+<div class="tree">
+<span class="lvl">Z0</span> <b>Transformer</b> <span class="note">— 전체 아키텍처</span><br>
+│<br>
+├─ <b>Input Pipeline</b> <span class="tag tag-enc">Encoder 입력</span><br>
+│&nbsp;&nbsp; ├─ Text → Tokenization → Token IDs <span class="note">(Unit 01)</span><br>
+│&nbsp;&nbsp; ├─ Token Embedding Lookup <span class="note">— E[id] (Unit 01)</span><br>
+│&nbsp;&nbsp; ├─ Embedding Scaling <span class="note">— ×√d<sub>model</sub> (원 논문 Transformer 계열. 모든 모델 공통은 아님)</span><br>
+│&nbsp;&nbsp; └─ + Positional Encoding + Dropout <span class="note">(Unit 09·S02/S03) · Dropout = training only</span><br>
+│<br>
+├─ <span class="lvl">Z1</span> <b>Encoder Stack ×N</b> <span class="tag tag-enc">Encoder</span> <span class="tag tag-reuse">repeated layer</span><br>
+│&nbsp;&nbsp; └─ <span class="lvl">Z2</span> <b>Encoder Layer 내부</b><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <span class="lvl">Z3</span> <b>Multi-Head Self-Attention (컨테이너)</b><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; └─ <b>MHA 컨테이너 내부</b> <span class="note">— Z3 상세</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Input X<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Linear Projection <span class="tag tag-reuse">same type ×3</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ Q = XW<sub>Q</sub> <span class="note">no activation</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ K = XW<sub>K</sub> <span class="note">no activation</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; └─ V = XW<sub>V</sub> <span class="note">no activation</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Split Heads <span class="note">— d<sub>model</sub> → h × d<sub>head</sub></span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <span class="lvl">Z4</span> <b>Attention Heads ×h → 단일 Head</b><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; └─ <span class="lvl">Z5</span> <b>Scaled Dot-Product Attention 내부</b><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <b>Input:</b> Q <span class="note">(무엇을 찾는가)</span>, K <span class="note">(무엇과 비교)</span>, V <span class="note">(섞일 정보)</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <b>Score:</b> Q·K<sup>T</sup> → Attention Score Matrix<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <b>Scale:</b> Score ÷ √d<sub>k</sub><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <b>Mask 적용</b> <span class="note">— score에 −∞ 또는 큰 음수를 추가한 뒤 softmax</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ Padding Mask <span class="note">— PAD 토큰 무시 (Enc·Dec 공통)</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; └─ Causal Mask <span class="note">— 미래 토큰 차단 (Decoder만)</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <b>Softmax:</b> row-wise → Attention Weight <span class="tag tag-reuse">same op</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Dropout <span class="note">(optional — attention weight 일부 약화 · training only)</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └─ <b>Weighted Sum:</b> Attention Weight · V → Head Output<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Concat Heads <span class="note">— h × d<sub>head</sub> → d<sub>model</sub></span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └─ Output Projection W<sub>O</sub> <span class="note">no activation</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Dropout <span class="note">— sublayer output · training only, inference off</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Residual Add <span class="note">— x + Dropout(Sublayer(x))</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ LayerNorm <span class="note">— Post-LN (원 논문). 현대 모델은 Pre-LN도 많음</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <span class="lvl">Z3</span> <b>Position-wise FFN</b><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ <span class="pvl">P1</span> Linear<sub>1</sub>: d<sub>model</sub> → d<sub>ff</sub> (확장)<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ <span class="pvl">P2</span> <b>Activation</b> <span class="note">— ReLU (원 논문) / GELU (BERT·GPT) / SwiGLU (최신 LLM)</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; └─ <span class="pvl">P1</span> Linear<sub>2</sub>: d<sub>ff</sub> → d<sub>model</sub> (축소) <span class="note">no activation</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Dropout <span class="tag tag-reuse">same op</span> <span class="note">training only</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Residual Add <span class="tag tag-reuse">same op</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └─ LayerNorm <span class="tag tag-reuse">same op</span><br>
+│<br>
+├─ <b>Decoder Input Pipeline</b> <span class="tag tag-dec">Decoder 입력</span><br>
+│&nbsp;&nbsp; ├─ Shifted-right Target Tokens <span class="note">— 이전 정답/이전 생성 토큰</span><br>
+│&nbsp;&nbsp; ├─ Target Token Embedding Lookup<br>
+│&nbsp;&nbsp; ├─ Embedding Scaling <span class="note">— ×√d<sub>model</sub></span> <span class="tag tag-reuse">same op</span><br>
+│&nbsp;&nbsp; └─ + Positional Encoding + Dropout <span class="tag tag-reuse">same op</span><br>
+│<br>
+├─ <span class="lvl">Z1</span> <b>Decoder Stack ×N</b> <span class="tag tag-dec">Decoder</span> <span class="tag tag-reuse">repeated layer</span><br>
+│&nbsp;&nbsp; └─ <span class="lvl">Z2</span> <b>Decoder Layer 내부</b><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <span class="lvl">Z3</span> <b>Masked Multi-Head Self-Attention</b> <span class="tag tag-reuse">same type + causal mask</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; <span class="note">Q=K=V=decoder hidden states · Causal Mask + Padding Mask 적용</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Dropout + Residual Add + LayerNorm <span class="tag tag-reuse">same op</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ <span class="lvl">Z3</span> <b>Cross-Attention (Encoder–Decoder)</b> <span class="tag tag-reuse">same type, 다른 source</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ Q = Decoder hidden state × W<sub>Q</sub> <span class="note">— W<sub>Q</sub>는 decoder cross-attn block의 parameter</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ K = Encoder Memory × W<sub>K</sub> <span class="note">— W<sub>K</sub>는 decoder cross-attn block의 parameter</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ V = Encoder Memory × W<sub>V</sub> <span class="note">— W<sub>V</sub>는 decoder cross-attn block의 parameter</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; ├─ Padding Mask <span class="note">— encoder memory의 PAD 무시</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │&nbsp;&nbsp; └─ Attention Weight · V → decoder가 encoder 정보 참조<br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Dropout + Residual Add + LayerNorm <span class="tag tag-reuse">same op</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ├─ Position-wise FFN <span class="tag tag-reuse">same type</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; └─ Dropout + Residual Add + LayerNorm <span class="tag tag-reuse">same op</span><br>
+│<br>
+└─ <b>Output Head</b><br>
+&nbsp;&nbsp;&nbsp; ├─ Decoder Final Hidden States<br>
+&nbsp;&nbsp;&nbsp; ├─ <span class="pvl">P1</span> Linear (Vocabulary Projection) <span class="note">— d<sub>model</sub> → |V|</span><br>
+&nbsp;&nbsp;&nbsp; ├─ Logits <span class="note">— vocab별 원점수 (training: logits → CrossEntropyLoss, softmax 내장)</span><br>
+&nbsp;&nbsp;&nbsp; ├─ <span class="pvl">P3</span> Softmax / probability view <span class="note">— inference 디코딩 시 확률 표시·토큰 선택용</span><br>
+&nbsp;&nbsp;&nbsp; └─ Token Selection <span class="note">— argmax / sampling / beam search</span><br>
+<br>
+<hr style="border:none;border-top:1px dashed var(--color-slate-4);margin:12px 0">
+<b>Reusable Primitives</b> <span class="note">— 여러 위치에서 반복 재사용되는 기본 단위</span><br>
+├─ <span class="pvl">P1</span> <b>Linear</b> <span class="note">— xW + b · post-process badge 필수 (none / Activation / Softmax / Sigmoid)</span><br>
+├─ <b>Matrix Multiplication</b> <span class="note">— QK<sup>T</sup>, Attn Weight·V</span><br>
+├─ <span class="pvl">P2</span> <b>Scalar Activation</b> <span class="note">— 숫자 하나를 누르는 함수</span><br>
+│&nbsp;&nbsp; ├─ ReLU <span class="note">— 원 논문 FFN</span><br>
+│&nbsp;&nbsp; ├─ GELU <span class="note">— BERT · GPT 계열</span><br>
+│&nbsp;&nbsp; ├─ SwiGLU <span class="note">— 최신 LLM (LLaMA 등)</span><br>
+│&nbsp;&nbsp; ├─ sigmoid <span class="note">— gate용 (0~1)</span><br>
+│&nbsp;&nbsp; └─ tanh <span class="note">— 상태값용 (-1~1)</span><br>
+├─ <span class="pvl">P3</span> <b>Distribution Function</b> <span class="note">— 벡터 전체를 합=1 비율 리스트로 변환</span><br>
+│&nbsp;&nbsp; ├─ Attention Softmax <span class="note">— token 위치 축 (row-wise)</span><br>
+│&nbsp;&nbsp; └─ Output Softmax <span class="note">— vocabulary 축 (inference 디코딩용)</span><br>
+├─ <b>Dropout</b> <span class="note">— sublayer output, attention weight · <b>training only, inference off</b></span><br>
+├─ <b>Residual Add</b> <span class="note">— x + F(x)</span><br>
+├─ <b>LayerNorm</b> <span class="note">— (x−μ)/σ × γ + β · <b>Post-LN(원 논문) / Pre-LN(현대 모델)</b></span><br>
+│<br>
+<b>Mask Types</b> <span class="note">— Attention Score에 적용</span><br>
+├─ <b>Padding Mask</b> <span class="note">— PAD 토큰 무시</span><br>
+│&nbsp;&nbsp; ├─ Encoder Self-Attention<br>
+│&nbsp;&nbsp; ├─ Decoder Self-Attention<br>
+│&nbsp;&nbsp; └─ Cross-Attention (encoder memory PAD)<br>
+└─ <b>Causal / Look-ahead Mask</b> <span class="note">— 미래 토큰 차단</span><br>
+&nbsp;&nbsp;&nbsp; └─ Decoder Masked Self-Attention<br>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2>2. Zoom Levels — Z(깊이) + P(primitive) 2축</h2>
+
+<p style="font-size:12px;color:var(--color-slate-8);margin-bottom:12px;">
+<b>2축 분리</b>: <span class="lv" style="display:inline;padding:1px 6px">Z</span> = zoom 깊이 (트리 depth와 단조 일치) ·
+<span class="pv" style="display:inline;padding:1px 6px">P</span> = 재사용 primitive (깊이 무관, 여러 Z에서 등장).
+구 L0–L9 단일 번호는 위치·타입·커리큘럼 3축을 혼용해 L8⊃L7 역전 등 5건의 불일치를 야기.
+</p>
+<table class="ltable">
+<thead><tr><th>Level</th><th>축</th><th>Scope</th><th>화면에 보이는 것</th><th>참조</th><th>Unit · Scene</th></tr></thead>
+<tbody>
+<tr><td colspan="6" style="font-weight:700;font-size:11px;letter-spacing:.05em;color:var(--accent);padding:12px 10px 4px">ZOOM 깊이 (Z축)</td></tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L0" class="zlink"><span class="lv">Z0</span></a></td><td>위치</td>
+  <td class="scope">Transformer 전체</td>
+  <td>Encoder ⇄ Decoder 2 블록 + cross 연결</td>
+  <td><img class="ref-thumb" src="storyboard/refs/transformer/L0-original-fig1.png" alt="Z0"></td>
+  <td class="units">U09·S04, U10·S01</td>
+</tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L1-enc" class="zlink"><span class="lv">Z1</span></a></td><td>위치</td>
+  <td class="scope">Enc/Dec Stack + Pipeline</td>
+  <td>Encoder ×N / Decoder ×N + Input Pipeline · PE · Output Head</td>
+  <td><img class="ref-thumb" src="storyboard/refs/transformer/L1-stacked.png" alt="Z1"></td>
+  <td class="units">U09·S04/S11, U10·S09</td>
+</tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L2-enc" class="zlink"><span class="lv">Z2</span></a></td><td>위치</td>
+  <td class="scope">단일 Layer 내부</td>
+  <td>Encoder: MHA → Add&amp;Norm → FFN → Add&amp;Norm<br>Decoder: + Masked Self, Cross-Attn<br><small>Post-LN(원논문) / Pre-LN(현대)</small></td>
+  <td><img class="ref-thumb" src="storyboard/refs/transformer/L2-encoder-block.png" alt="Z2"></td>
+  <td class="units">U09·S04, U10·S01</td>
+</tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L3-self" class="zlink"><span class="lv">Z3</span></a></td><td>위치</td>
+  <td class="scope">Sublayer 단위<br><small>MHA 컨테이너 · FFN · Add&amp;Norm</small></td>
+  <td><b>MHA 컨테이너</b>: Linear W_Q/W_K/W_V → Attention Heads ×h → Concat → W_O<br><b>FFN</b>: Linear₁ → Act → Drop → Linear₂<br><b>Add&amp;Norm</b>: Dropout → +x → LayerNorm<br><small>MHA·FFN·Add&amp;Norm 모두 Z3 = 형제 (구 L3·L8 비대칭 해소)</small></td>
+  <td><img class="ref-thumb" src="storyboard/refs/transformer/L4-mha-internal.png" alt="Z3 MHA"><br><img class="ref-thumb" src="storyboard/refs/transformer/L3-mha-in-block.png" alt="Z3 block" style="margin-top:4px"></td>
+  <td class="units">U07, U08, U09·S05/S08</td>
+</tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L4-self" class="zlink"><span class="lv">Z4</span></a></td><td>위치</td>
+  <td class="scope">단일 Attention Head</td>
+  <td>head i: Linear W_Qⁱ/W_Kⁱ/W_Vⁱ → Q_i/K_i/V_i → SDPA → z_i<br><small>head마다 다른 weight → 다른 관점</small></td>
+  <td><img class="ref-thumb" src="storyboard/refs/transformer/L4-head-heatmap-bipartite.png" alt="Z4"><br><img class="ref-thumb" src="storyboard/refs/transformer/attn-self-x.png" alt="Z4 self" style="margin-top:4px"></td>
+  <td class="units">U07·S02–S07, U08·S01–S08</td>
+</tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L5" class="zlink"><span class="lv">Z5</span></a></td><td>위치</td>
+  <td class="scope">SDPA 커널</td>
+  <td>MatMul(QK<sup>T</sup>) → Scale(÷√d<sub>k</sub>) → Mask(−∞) → Softmax → Dropout → MatMul(×V)</td>
+  <td><img class="ref-thumb" src="storyboard/refs/transformer/L5-scaled-dot-product.png" alt="Z5"></td>
+  <td class="units">U07·S04–S06, U10·S02</td>
+</tr>
+<tr><td colspan="6" style="font-weight:700;font-size:11px;letter-spacing:.05em;color:var(--color-amber-11);padding:12px 10px 4px">재사용 PRIMITIVE (P축) — 깊이 무관, 여러 Z에서 등장</td></tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L7" class="zlink"><span class="pv">P1</span></a></td><td>타입</td>
+  <td class="scope">Linear (xW+b)</td>
+  <td>공통 구조 · post-process: none / Activation / Softmax<br><small>등장: Output Head(Z1) · MHA projection(Z3) · FFN Linear(Z3) · Head W_Qⁱ(Z4)</small></td>
+  <td><span style="font-size:11px;color:var(--color-slate-7)">전용 참조 없음<br>(범용 primitive)</span></td>
+  <td class="units">U02·S01, U07·S02, U08·S05</td>
+</tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L9a" class="zlink"><span class="pv">P2</span></a></td><td>타입</td>
+  <td class="scope">Scalar Activation</td>
+  <td>z → f(z) 원소별 비선형<br>ReLU / GELU / SwiGLU / sigmoid / tanh<br><small>등장: FFN 내부(Z3)</small></td>
+  <td><span style="font-size:11px;color:var(--color-slate-7)">전용 참조 없음<br>(범용 primitive)</span></td>
+  <td class="units">U02·S02–S07</td>
+</tr>
+<tr>
+  <td><a href="transformer-anatomy/Transformer Anatomy.html?level=L9b" class="zlink"><span class="pv">P3</span></a></td><td>타입</td>
+  <td class="scope">Distribution Fn (Softmax)</td>
+  <td>벡터 → 합=1 확률 분포<br><small>등장: SDPA Softmax(Z5) · Output Head(Z1)</small></td>
+  <td><span style="font-size:11px;color:var(--color-slate-7)">전용 참조 없음<br>(범용 primitive)</span></td>
+  <td class="units">U02·S07, U07·S05</td>
+</tr>
+</tbody>
+</table>
+
+<h3>Zoom 탐색 방향</h3>
+<div style="background:var(--color-white);border:1px solid var(--color-slate-3);border-radius:8px;padding:18px 20px;font-size:13px;line-height:1.8;">
+<b>Top-down (해부도 진입):</b> Z0 → Z1 → Z2 → Z3 → Z4 → Z5<br>
+<b>Bottom-up (구성 요소 이해):</b> P2/P3 → P1 → Z5 → Z4 → Z3 → Z2 → Z1 → Z0<br>
+<b>커리큘럼 순서 (실제 제작):</b> P2·P3(U02) → Z3 FFN(U03) → P1(U07) → Z5(U07) → Z4(U08) → Z3 MHA(U09) → Z2→Z1→Z0(U09) → Decoder(U10)<br><br>
+<b>규칙:</b> 처음 등장 시 open 해부 → 이후 same type으로 collapsed 재사용 → 차이점만 open<br>
+<b>2축 원칙:</b> Z축 = 트리 depth와 단조 일치 (역전 없음) · P축 = 깊이 무관 재사용 (등장 위치만 다름)
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2>3. 참조 이미지 갤러리</h2>
+
+<h3>3-1. Transformer 구조 (Z0–Z5)</h3>
+<div class="gallery">
+  <figure><img src="storyboard/refs/transformer/fig1-annotated-zoom.png" alt="Fig1 zoom"><figcaption><span class="flvl">Z0→Z5</span> 논문 Fig 1 + Zoom-In 패널 — semantic zoom 경로 원형 <small>(논문)</small></figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/fig2-sdpa-mha-paper.png" alt="Fig2"><figcaption><span class="flvl">Z3·Z5</span> 논문 Fig 2 — SDPA(좌) + MHA 컨테이너(우) <small>(논문)</small></figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/enc-dec-jalammar.png" alt="EncDec"><figcaption><span class="flvl">Z2</span> Encoder(2 sublayer) ‖ Decoder(3 sublayer) — Enc-Dec Attention 별도 sublayer <small>(Illustrated Transformer)</small></figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L2-alammar-encoder.png" alt="Alammar Enc"><figcaption><span class="flvl">Z2–Z3</span> Encoder 상세 — Self-Attn → Add&Norm → FF(토큰별) → Add&Norm + 점선 skip <small>(Illustrated Transformer)</small></figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L0-original-fig1.png" alt="Fig1"><figcaption><span class="flvl">Z0–Z2</span> 원논문 Figure 1 — Transformer 전체 아키텍처</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L0-encoder-decoder.png" alt="L0"><figcaption><span class="flvl">Z0</span> Encoder ⇄ Decoder (추상)</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L0-full-annotated.png" alt="L0 full"><figcaption><span class="flvl">Z0–Z2</span> 전체 annotated</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L1-stacked.png" alt="L1"><figcaption><span class="flvl">Z1</span> Encoder ×N / Decoder ×N 쌓인 구조</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L2-encoder-block.png" alt="L2"><figcaption><span class="flvl">Z2</span> Encoder layer 내부 (MHA → FF)</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L2-residual-connection.png" alt="Residual"><figcaption><span class="flvl">Z3</span> Residual Connection (Add&Norm) — F(x)+x, identity skip path</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L3-mha-in-block.png" alt="L3"><figcaption><span class="flvl">Z3</span> MHA collapsed block — 내부를 열기 전 한 블록</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L4-mha-internal.png" alt="L4"><figcaption><span class="flvl">Z3</span> MHA 컨테이너 내부 (Linear ×3 → Heads ×h → Concat → W_O)</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L5-scaled-dot-product.png" alt="L5/L6"><figcaption><span class="flvl">Z5</span> SDPA 내부 단계 — QKᵀ → Scale → Mask → Softmax → ×V</figcaption></figure>
+</div>
+
+<h3>3-2. Attention 패턴 · Head 시각화 (Z4–Z5)</h3>
+<div class="gallery">
+  <figure><img src="storyboard/refs/transformer/L4-head-heatmap-bipartite.png" alt="Head Heatmap"><figcaption><span class="flvl">Z4</span> Head별 Attention heatmap + bipartite graph</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L4-bert-head-patterns.png" alt="BERT Heads"><figcaption><span class="flvl">Z4</span> BERT Head 패턴 6종 (dobj, det, poss, auxpass, pobj, coref)</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L6-qkt-score-matrix-color.png" alt="QKT Score"><figcaption><span class="flvl">Z5</span> Q×K<sup>T</sup> score matrix (컬러)</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/L6-causal-mask-matrix.png" alt="Causal Mask"><figcaption><span class="flvl">Z5</span> Causal Mask matrix (하삼각)</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/attn-qkv-matrix.png" alt="QKV Matrix"><figcaption><span class="flvl">Formula Lock</span> softmax(QK<sup>T</sup>/√d<sub>k</sub>)V — 수식 고정 장면 (구조 이미지 아님)</figcaption></figure>
+</div>
+
+<h3>3-3. Self / Cross Attention 계보 (Z4)</h3>
+<div class="gallery">
+  <figure><img src="storyboard/refs/transformer/attn-self-x.png" alt="Self"><figcaption><span class="flvl">Z4.1</span> Q/K/V Projection overview (Self) — Linear 단위 이미지 아님, projection 묶음</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/attn-cross-h.png" alt="Cross"><figcaption><span class="flvl">Z4.1</span> Q/K/V Projection overview (Cross) — Q=s<sub>t-1</sub>, K/V=H</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/attn-rnn-korean.png" alt="RNN Attn"><figcaption><span class="flvl">참조</span> RNN Attention (나는 사과를 좋아해 → I love)</figcaption></figure>
+</div>
+
+<h3>3-4. Seq2Seq · RNN 참조 (Unit 04/06/07)</h3>
+<div class="gallery">
+  <figure><img src="storyboard/refs/rnn/rnn-unrolled-cells.png" alt="RNN"><figcaption><span class="flvl">U04</span> RNN unrolled cells (x_t → tanh → h_t)</figcaption></figure>
+  <figure><img src="storyboard/refs/seq2seq/seq2seq-enc-context-dec.png" alt="Seq2Seq"><figcaption><span class="flvl">U06</span> Seq2Seq: Encoder → Context → Decoder</figcaption></figure>
+  <figure><img src="storyboard/refs/seq2seq/decoder-autoregressive-loop.png" alt="Autoregressive"><figcaption><span class="flvl">U06/U10</span> Decoder autoregressive loop</figcaption></figure>
+  <figure><img src="storyboard/refs/seq2seq/rnn-attention-mechanism.png" alt="RNN Attn Mech"><figcaption><span class="flvl">U07</span> RNN Attention mechanism (h × softmax → weighted sum)</figcaption></figure>
+</div>
+
+<h3>3-5. 수식 참조</h3>
+<div class="gallery">
+  <figure><img src="storyboard/refs/transformer/formula-bahdanau-score.png" alt="Bahdanau"><figcaption><span class="flvl">수식</span> Bahdanau score: e = W_s · tanh(W_En H + W_De s_{t-1})</figcaption></figure>
+  <figure><img src="storyboard/refs/transformer/formula-scaled-dot-product.png" alt="Scaled DP"><figcaption><span class="flvl">수식</span> Scaled dot-product: e = Q·K<sup>T</sup>/√d<sub>k</sub></figcaption></figure>
+  <figure><img src="storyboard/refs/seq2seq/formula-weighted-sum.png" alt="Weighted Sum"><figcaption><span class="flvl">수식</span> Weighted sum: a = Σα_i h_i = H·α</figcaption></figure>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2>4. Decoder 추가 차이점 (Encoder 대비)</h2>
+<div style="background:var(--color-white);border:1px solid var(--color-slate-3);border-radius:8px;padding:18px 20px;font-size:13px;line-height:1.8;">
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+<tr style="border-bottom:2px solid var(--color-slate-3)"><th style="text-align:left;padding:6px">블록</th><th style="text-align:left;padding:6px">Encoder</th><th style="text-align:left;padding:6px">Decoder</th><th style="text-align:left;padding:6px">차이</th></tr>
+<tr style="border-bottom:1px solid var(--color-slate-2)"><td style="padding:6px">Self-Attention</td><td style="padding:6px">source 토큰끼리 참조<br>+ Padding Mask 가능</td><td style="padding:6px">Masked — 미래 토큰 차단<br>Causal Mask + Padding Mask 결합</td><td style="padding:6px">하삼각 causal mask 추가</td></tr>
+<tr style="border-bottom:1px solid var(--color-slate-2)"><td style="padding:6px">Cross-Attention</td><td style="padding:6px">없음</td><td style="padding:6px">Q = decoder hidden × W<sub>Q</sub><br>K = encoder memory × W<sub>K</sub><br>V = encoder memory × W<sub>V</sub><br><small>W<sub>Q</sub>/W<sub>K</sub>/W<sub>V</sub>는 decoder cross-attn block의 parameter</small></td><td style="padding:6px">블록 1개 추가<br>encoder memory = 재료<br>projection = decoder 내부</td></tr>
+<tr style="border-bottom:1px solid var(--color-slate-2)"><td style="padding:6px">Add&amp;Norm</td><td style="padding:6px">×2</td><td style="padding:6px">×3</td><td style="padding:6px">Cross-Attn 뒤 1개 추가<br><small>Post-LN(원논문) / Pre-LN(현대)</small></td></tr>
+<tr style="border-bottom:1px solid var(--color-slate-2)"><td style="padding:6px">FFN</td><td style="padding:6px">동일</td><td style="padding:6px">동일</td><td style="padding:6px">same type, different parameters</td></tr>
+<tr><td style="padding:6px">Output Head</td><td style="padding:6px">없음</td><td style="padding:6px">Linear → logits → Softmax/probability view<br><small>Training: logits → CE Loss (softmax 내장)<br>Inference: softmax → token selection</small></td><td style="padding:6px">Decoder만 보유</td></tr>
+</table>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2>5. Linear Post-Process 매핑 (P1 상세)</h2>
+<div style="background:var(--color-white);border:1px solid var(--color-slate-3);border-radius:8px;padding:18px 20px;font-size:13px;line-height:1.8;">
+<table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+<tr style="border-bottom:2px solid var(--color-slate-3)"><th style="text-align:left;padding:6px">Linear 위치</th><th style="text-align:left;padding:6px">Post-process</th><th style="text-align:left;padding:6px">역할</th></tr>
+<tr style="border-bottom:1px solid var(--color-slate-2)"><td style="padding:6px">Q/K/V projection (×3)</td><td style="padding:6px"><code>no activation</code></td><td style="padding:6px">projection — 다른 공간으로 매핑</td></tr>
+<tr style="border-bottom:1px solid var(--color-slate-2)"><td style="padding:6px">W_O (output projection)</td><td style="padding:6px"><code>no activation</code></td><td style="padding:6px">head output 섞기</td></tr>
+<tr style="border-bottom:1px solid var(--color-slate-2)"><td style="padding:6px">FFN Linear<sub>1</sub></td><td style="padding:6px"><code>+ Activation</code><br><small>ReLU(원논문) / GELU(BERT·GPT) / SwiGLU(최신 LLM)</small></td><td style="padding:6px">d_model → d_ff 확장 + 비선형 변환</td></tr>
+<tr style="border-bottom:1px solid var(--color-slate-2)"><td style="padding:6px">FFN Linear<sub>2</sub></td><td style="padding:6px"><code>no activation</code></td><td style="padding:6px">d_ff → d_model 축소</td></tr>
+<tr><td style="padding:6px">Output / LM Head</td><td style="padding:6px"><code>Linear → logits</code><br><small>Softmax는 확률 표시 / decoding에서 사용</small></td><td style="padding:6px">d_model → |V| vocab projection<br>Training: logits → CE Loss<br>Inference: logits → softmax → token selection</td></tr>
+</table>
+</div>
+
+<script src="shared/surface-nav.js" data-surface-root="root"></script>
+</body>
+</html>

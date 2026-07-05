@@ -31,16 +31,17 @@
   var anatBase = isAnatomy ? "" : "transformer-anatomy/";
 
   // ── Surface registry ──
-  // 이 저장소에 실재하는 인터랙티브 surface만 등록한다.
-  // Zoom Plan(정적 문서 + 참조 이미지)을 추가하려면 아래에 한 줄 더 넣으면 된다:
-  //   { id:"plan", label:"Zoom Plan", href: base + "Transformer%20Zoom%20Plan.html", match:["Zoom Plan"] }
+  // 3개 top-level surface. href는 현재 위치(root/anatomy)에 맞춰 상대경로로 계산된다.
   var SURFACES = [
-    { id: "player", label: "Animation Player",
-      href: base + "AI-ML%20Animation%20Player.html",
-      match: ["AI-ML Animation Player", "AI-ML%20Animation%20Player"] },
+    { id: "plan", label: "Zoom Plan",
+      href: base + "Transformer%20Zoom%20Plan.html",
+      match: ["Transformer Zoom Plan", "Transformer%20Zoom%20Plan"] },
     { id: "anatomy", label: "Transformer Anatomy",
       href: anatBase + "Transformer%20Anatomy.html",
       match: ["Transformer Anatomy", "Transformer%20Anatomy"] },
+    { id: "player", label: "Animation Player",
+      href: base + "AI-ML%20Animation%20Player.html",
+      match: ["AI-ML Animation Player", "AI-ML%20Animation%20Player"] },
   ];
 
   var path = decodeURIComponent(location.pathname);
